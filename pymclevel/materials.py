@@ -67,11 +67,11 @@ class BlockstateAPI(object):
     """
     An easy API to convert from numerical ID's to Blockstates and vice-versa. Each
     material has its own instance of this class. You can access it in a variety of ways::
-    
+
         from pymclevel.materials import BlockstateAPI, alphaMaterials, pocketMaterials
-    
+
         api = BlockStateAPI.material_map[alphaMaterials]
-        
+
         api = alphaMaterials.blockstate_api
     """
     material_map = {}
@@ -101,7 +101,7 @@ class BlockstateAPI(object):
     def idToBlockstate(self, bid, data):
         """
         Converts from a numerical ID to a BlockState string
-    
+
         :param bid: The ID of the block
         :type bid: int
         :param data: The data value of the block
@@ -111,12 +111,12 @@ class BlockstateAPI(object):
         """
         if bid not in self.block_map:
             return "<Unknown>", {}
-        
+
         name = self.block_map[bid].replace("minecraft:", "")
 
         if name not in self.blockstates["minecraft"]:
             return "<Unknown>", {}
-        
+
         properties = {}
         for prop in self.blockstates["minecraft"][name]["properties"]: # TODO: Change this if MCEdit's mod support ever improves
             if prop["<data>"] == data:
@@ -126,11 +126,11 @@ class BlockstateAPI(object):
                     properties[field] = prop[field]
                 return name, properties
         return name, properties
-    
+
     def blockstateToID(self, name, properties):
         """
         Converts from a BlockState to a numerical ID/Data pair
-    
+
         :param name: The BlockState name
         :type name: str
         :param properties: A list of Property/Value pairs in dict form
@@ -138,17 +138,17 @@ class BlockstateAPI(object):
         :return: A tuple containing the numerical ID/Data pair (<id>, <data>)
         :rtype: tuple
         """
-        
+
         if ":" in name:
             prefix, name = name.split(":")
         else:
             prefix = "minecraft"
-            
+
         if prefix not in self.blockstates:
             return -1, -1
         elif name not in self.blockstates[prefix]:
             return -1, -1
-        
+
         bid = self.blockstates[prefix][name]["id"]
         for prop in self.blockstates[prefix][name]["properties"]:
             correct = True
@@ -158,12 +158,12 @@ class BlockstateAPI(object):
             if correct:
                 return bid, prop["<data>"]
         return bid, 0
-    
+
     @staticmethod
     def stringifyBlockstate(name, properties):
         """
         Turns a Blockstate into a single string
-        
+
         :param name: The Block's base name. IE: grass, command_block, etc.
         :type name: str
         :param properties: A list of Property/Value pairs in dict form
@@ -179,31 +179,31 @@ class BlockstateAPI(object):
         if result.endswith("["):
             return result[:-1]
         return result[:-1] + "]"
-    
+
     @staticmethod
     def deStringifyBlockstate(blockstate):
         """
         Turns a single Blockstate string into a base name, properties tuple
-        
+
         :param blockstate: The Blockstate string
         :type blockstate: str
         :return: A tuple containing the base name and the properties for the Blockstate
-        :rtype: tuple 
+        :rtype: tuple
         """
         seperated = blockstate.split("[")
-        
+
         if len(seperated) == 1:
             if not seperated[0].startswith("minecraft:"):
-                seperated[0] = "minecraft:" + seperated[0] 
+                seperated[0] = "minecraft:" + seperated[0]
             return seperated[0], {}
-        
+
         name, props = seperated
-        
+
         if not name.startswith("minecraft:"):
             name = "minecraft:" + name
-            
+
         properties = {}
-    
+
         props = props[:-1]
         props = props.split(",")
         for prop in props:
@@ -254,6 +254,7 @@ class MCMaterials(object):
         self.types = {}
 
         self.Air = self.addBlock(0,
+                                 idStr="air",
                                  name="Air",
                                  texture=(0, 336),
                                  opacity=0,
@@ -291,11 +292,19 @@ class MCMaterials(object):
                 level.materials["Air"]  # also returns Air
                 level.materials["Powered Rail"]  # returns Powered Rail
                 level.materials["Lapis Lazuli Block"]  # in Classic
+                level.materials["emerald_block"]  # by id string
+                level.materials["minecraft:emerald_block"]  # with namespace
 
            """
         if isinstance(key, basestring):
+            # Oh, I am NOT handling namespaces right...
+            if "minecraft:" in key:
+                key = key[10:]
             for b in self.allBlocks:
-                if b.name == key:
+                if (
+                   ( b.name == key )
+                or ( b.idStr == key )
+                ):
                     return b
             if "[" not in key:
                 lowest_block = None
@@ -353,7 +362,7 @@ class MCMaterials(object):
         else:
             bl = Block(self, block_id, blockData=data)
             return bl
-        
+
     def setup_blockstates(self, blockstate_definition_file):
         self.blockstate_api = BlockstateAPI(self, blockstate_definition_file)
 
@@ -492,6 +501,7 @@ class MCMaterials(object):
             print (blockID, blockData)
         stringName = kw.pop('idStr', '')
 
+        self.idStr[blockID] = stringName
         self.lightEmission[blockID] = kw.pop('brightness', self.defaultBrightness)
         self.lightAbsorption[blockID] = kw.pop('opacity', self.defaultOpacity)
         self.aka[blockID][blockData] = kw.pop('aka', "")

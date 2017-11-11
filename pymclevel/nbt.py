@@ -22,6 +22,7 @@ from contextlib import contextmanager
 import gzip
 import itertools
 import logging
+import string
 import struct
 import zlib
 from cStringIO import StringIO
@@ -39,6 +40,9 @@ dump_fName = 'dump_pe.txt'
 
 log = logging.getLogger(__name__)
 
+
+class JSONFormatError(RuntimeError):
+    pass
 
 class NBTFormatError(RuntimeError):
     pass
@@ -145,12 +149,60 @@ class TAG_Value(object):
     def isCompound(self):
         return False
 
+    def eq(self,other):
+        if type(other) in [
+            TAG_Compound,
+            TAG_List,
+            TAG_Byte_Array,
+            TAG_Short_Array,
+            TAG_Int_Array
+        ]:
+            return False
+        return self.value == other.value
+
+    def ne(self,other):
+        if type(other) in [
+            TAG_Compound,
+            TAG_List,
+            TAG_Byte_Array,
+            TAG_Short_Array,
+            TAG_Int_Array
+        ]:
+            return True
+        return self.value != other.value
+
+    def issubset(self,other):
+        return self.eq(other)
+
+    def update(self,newTag):
+        self.value = newTag
+
 
 class TAG_Byte(TAG_Value):
     __slots__ = ('_name', '_value')
     tagID = TAG_BYTE
     fmt = struct.Struct(">b")
     data_type = int
+
+    @property
+    def json(self):
+        """ Convert TAG_Byte to JSON string """
+        if self.name == "":
+            prefix = ""
+        else:
+            prefix = self.name + ":"
+        return prefix + str(self.value) + "b"
+
+    @json.setter
+    def json(self, newVal):
+        """ Parse a string into a TAG_Byte """
+        # Trim the type inidicator character, if found
+        if newVal[-1].lower() == "b":
+            valStr = newVal[:-1]
+        else:
+            valStr = newVal
+
+        self.value = valStr
 
 
 class TAG_Short(TAG_Value):
@@ -159,12 +211,46 @@ class TAG_Short(TAG_Value):
     fmt = struct.Struct(">h")
     data_type = int
 
+    @property
+    def json(self):
+        """ Convert TAG_Short to JSON string """
+        if self.name == "":
+            prefix = ""
+        else:
+            prefix = self.name + ":"
+        return prefix + str(self.value) + "s"
+
+    @json.setter
+    def json(self, newVal):
+        """ Parse a string into a TAG_Short """
+        # Trim the type inidicator character, if found
+        if newVal[-1].lower() == "s":
+            valStr = newVal[:-1]
+        else:
+            valStr = newVal
+
+        self.value = valStr
+
 
 class TAG_Int(TAG_Value):
     __slots__ = ('_name', '_value')
     tagID = TAG_INT
     fmt = struct.Struct(">i")
     data_type = int
+
+    @property
+    def json(self):
+        """ Convert TAG_Int to JSON string """
+        if self.name == "":
+            prefix = ""
+        else:
+            prefix = self.name + ":"
+        return prefix + str(self.value)
+
+    @json.setter
+    def json(self, newVal):
+        """ Parse a string into a TAG_Int """
+        self.value = newVal
 
 
 class TAG_Long(TAG_Value):
@@ -173,6 +259,26 @@ class TAG_Long(TAG_Value):
     fmt = struct.Struct(">q")
     data_type = long
 
+    @property
+    def json(self):
+        """ Convert TAG_Long to JSON string """
+        if self.name == "":
+            prefix = ""
+        else:
+            prefix = self.name + ":"
+        return prefix + str(self.value) + "l"
+
+    @json.setter
+    def json(self, newVal):
+        """ Parse a string into a TAG_Long """
+        # Trim the type inidicator character, if found
+        if newVal[-1].lower() == "l":
+            valStr = newVal[:-1]
+        else:
+            valStr = newVal
+
+        self.value = valStr
+
 
 class TAG_Float(TAG_Value):
     __slots__ = ('_name', '_value')
@@ -180,12 +286,54 @@ class TAG_Float(TAG_Value):
     fmt = struct.Struct(">f")
     data_type = float
 
+    @property
+    def json(self):
+        """ Convert TAG_Float to JSON string """
+        if self.name == "":
+            prefix = ""
+        else:
+            prefix = self.name + ":"
+
+        return prefix + str(self.value) + "f"
+
+    @json.setter
+    def json(self, newVal):
+        """ Parse a string into a TAG_Float """
+        # Trim the type inidicator character, if found
+        if newVal[-1].lower() == "f":
+            valStr = newVal[:-1]
+        else:
+            valStr = newVal
+
+        self.value = valStr
+
 
 class TAG_Double(TAG_Value):
     __slots__ = ('_name', '_value')
     tagID = TAG_DOUBLE
     fmt = struct.Struct(">d")
     data_type = float
+
+    @property
+    def json(self):
+        """ Convert TAG_Double to JSON string """
+        if self.name == "":
+            prefix = ""
+        else:
+            prefix = self.name + ":"
+
+        return prefix + str(self.value) + "d"
+
+    @json.setter
+    def json(self, newVal):
+        """ Parse a string into a TAG_Double """
+        # Trim the type inidicator character, if found
+        if newVal[-1].lower() == "d":
+            valStr = newVal[:-1]
+        else:
+            valStr = newVal
+
+        self.value = valStr
 
 
 class TAG_Byte_Array(TAG_Value):
@@ -222,6 +370,34 @@ class TAG_Byte_Array(TAG_Value):
     def write_value(self, buf):
         value_str = self.value.tostring()
         buf.write(struct.pack(">I%ds" % (len(value_str),), self.value.size, value_str))
+
+    def eq(self,other):
+        if type(other) not in [
+            TAG_Byte_Array,
+            TAG_Short_Array,
+            TAG_Int_Array
+        ]:
+            return False
+        if len(self) != len(other):
+            return False
+        for i in range(len(self)):
+            if self.value[i].ne(other.value[i]):
+                return False
+        return True
+
+    def ne(self,other):
+        if type(other) not in [
+            TAG_Byte_Array,
+            TAG_Short_Array,
+            TAG_Int_Array
+        ]:
+            return True
+        if len(self) != len(other):
+            return True
+        for i in range(len(self)):
+            if self.value[i].ne(other.value[i]):
+                return True
+        return False
 
 
 class TAG_Int_Array(TAG_Byte_Array):
@@ -273,8 +449,35 @@ class TAG_String(TAG_Value):
     def write_value(self, buf):
         write_string(self._value, buf)
 
-string_len_fmt = struct.Struct(">H")
+    def decode(self, charset):
+        self.value.decode(charset)
 
+    @property
+    def json(self):
+        """ Convert TAG_String to JSON string """
+        try:
+            ownName = self.name
+            if ownName == "":
+                prefix = '"'
+            else:
+                prefix = self.name + ':"'
+        except AttributeError:
+            prefix = '"'
+
+        return prefix + self.value + '"'
+
+    @json.setter
+    def json(self, newVal):
+        """ Parse a string into a TAG_Double """
+        # Trim the type inidicator character, if found
+        if newVal[0] == ur'"':
+            valStr = newVal[1:-1]
+        else:
+            valStr = newVal
+
+        self._value = unicode(valStr)
+
+string_len_fmt = struct.Struct(">H")
 
 def load_string(ctx):
     data = ctx.data[ctx.offset:]
@@ -286,7 +489,10 @@ def load_string(ctx):
 
 
 def write_string(string, buf):
-    encoded = string.encode('utf-8')
+    if (string is None):
+        encoded = "".encode('utf-8')
+    else:
+        encoded = string.encode('utf-8')
     buf.write(struct.pack(">h%ds" % (len(encoded),), len(encoded), encoded))
 
 
@@ -433,6 +639,67 @@ class TAG_Compound(TAG_Value, collections.MutableMapping):
         return True
 
 
+    @property
+    def json(self):
+        """ Convert TAG_Compound to JSON string """
+        if self.name == "":
+            result = "{"
+        else:
+            result = self.name + ":{"
+        for i in self.value:
+            result += i.json + ","
+        if result[-1] == ",":
+            result = result[:-1]
+        return result + "}"
+
+    def eq(self,other):
+        if type(other) != TAG_Compound:
+            return False
+        if len(self) != len(other):
+            return False
+        try:
+            for aKey in self.keys():
+                if self[aKey].ne(other[aKey]):
+                    return False
+        except:
+            return False
+        return True
+
+    def ne(self,other):
+        if type(other) != TAG_Compound:
+            return True
+        if len(self) != len(other):
+            return True
+        try:
+            for aKey in self.keys():
+                if self[aKey].ne(other[aKey]):
+                    return True
+        except:
+            return True
+        return False
+
+    def issubset(self,other):
+        if type(other) != TAG_Compound:
+            return False
+        try:
+            for aKey in self.keys():
+                if not self[aKey].issubset(other[aKey]):
+                    return False
+        except:
+            return False
+        return True
+
+    def update(self,newTag):
+        for aKey in newTag.keys():
+            if aKey not in self:
+                json = newTag[aKey].json
+                newSubTag = json_to_tag(json)
+                if newSubTag.name != aKey:
+                    newSubTag = newSubTag[aKey]
+                self[aKey] = newSubTag
+            else:
+                self[aKey].update(newTag[aKey])
+
 class TAG_List(TAG_Value, collections.MutableSequence):
     """A homogenous list of unnamed data of a single TAG_* type.
     Once created, the type can only be changed by emptying the list
@@ -524,6 +791,50 @@ class TAG_List(TAG_Value, collections.MutableSequence):
         value.name = ""
         self.value.insert(index, value)
 
+    @property
+    def json(self):
+        """ Convert TAG_List to JSON string """
+        if self.name == "":
+            result = "["
+        else:
+            result = self.name + ":["
+        # TODO parsing needs to be double checked
+        for i in self.value:
+            result += i.json + ","
+        if result[-1] == ",":
+            result = result[:-1]
+        return result + "]"
+
+    def eq(self,other):
+        if type(other) != TAG_List:
+            return False
+        if len(self.value) != len(other.value):
+            return False
+        for i in range(len(self.value)):
+            if self[i].ne(other[i]):
+                return False
+        return True
+
+    def ne(self,other):
+        if type(other) != TAG_List:
+            return True
+        if len(self.value) != len(other.value):
+            return True
+        for i in range(len(self.value)):
+            if self[i].ne(other[i]):
+                return True
+        return False
+
+    def issubset(self,other):
+        if type(other) != TAG_List:
+            return False
+        if len(self.value) != len(other.value):
+            return False
+        for i in range(len(self.value)):
+            # Order insensitive
+            if not any(self[i].issubset(other[j]) for j in range(len(other.value))):
+                return False
+        return True
 
 tag_classes = {}
 
@@ -686,4 +997,242 @@ except ImportError as err:
     log.error("Failed to import Cythonized nbt file. Running on (very slow) pure-python nbt fallback.")
     log.error("(Did you forget to run 'setup.py build_ext --inplace'?)")
     log.error("%s"%err)
+
+
+################################################################################
+# BEGIN JSON TO TAG PARSER
+
+"""
+Oh dear, this is one big mess of code. It used to be much worse. It works for
+strict json to nbt parsing, but doesn't handle some of the more leniant uses
+that Minecraft allows; for instance, raw json text starting like:
+
+["",{...}]
+
+This isn't read right, as NBT only allows list elements to be the same type.
+In this case, the starting quotes should be ignored, but aren't atm.
+
+Anyways, good enough for my needs for now.
+"""
+
+def _jsonParser_resetCurState(state):
+    state["name"] = ''
+    state["native"] = None
+    state["tag"] = None
+
+def _jsonParser_storeValue(state):
+    # Ensure we have a value to store
+    if state["native"] is None:
+        return
+
+    # Determine how to index where the new value goes,
+    # and put it there.
+    if type(state["tag"]) is TAG_Compound:
+        state["tag"].name = state["name"]
+    elif type(state["tag"]) is TAG_List:
+        state["tag"].name = state["name"]
+    else:
+        # type and value must be determined
+        state["tag"] = _jsonParser_jsonToTag(state["native"])
+        state["tag"].name = state["name"]
+
+    # Determine and use the correct function
+    # to store the new tag in its container
+    if type(state["stackTag"][-1]) is TAG_Compound:
+        state["stackTag"][-1].add(state["tag"])
+    elif type(state["stackTag"][-1]) is TAG_List:
+        state["stackTag"][-1].append(state["tag"])
+    else:
+        raise JSONFormatError("Invalid tag container type.")
+
+    # If the new value is a container, go inside it.
+    if ( ( type(state["tag"]) is TAG_Compound ) or
+         ( type(state["tag"]) is TAG_List ) ):
+        state["stackTag"].append(state["tag"])
+
+    # Reset the current state.
+    _jsonParser_resetCurState(state)
+
+def _jsonParser_exitNestLevel(state):
+    _jsonParser_storeValue(state)
+    state["stackTag"].pop()
+
+def _jsonParser_jsonToTag(json):
+    """
+    Converts a command-ready json string into an NBT tag.
+    The NBT tag returned may contain other NBT tags.
+    Default type assumptions taken from:
+    https://minecraft.gamepedia.com/Commands#Data_tags
+    """
+    # Handle the special case of booleans, which are really bytes
+    if json.lower() == "true":
+        json = "1b"
+    if json.lower() == "false":
+        json = "0b"
+
+    # Grab the last character
+    tailChar = json[-1]
+    sansTail = json[:-1]
+    sansQuotes = json
+    if (
+    ( json[0] == '"' )
+    and ( json[-1] == '"' )
+    ):
+        sansQuotes = json[1:-1]
+
+    # Split these by type
+    if tailChar.lower() == "b":
+        try:
+            return TAG_Byte(sansTail)
+        except:
+            return TAG_String(sansQuotes)
+    elif tailChar.lower() == "s":
+        try:
+            return TAG_Short(sansTail)
+        except:
+            return TAG_String(sansQuotes)
+    elif tailChar.lower() == "l":
+        try:
+            return TAG_Long(sansTail)
+        except:
+            return TAG_String(sansQuotes)
+    elif tailChar.lower() == "f":
+        try:
+            return TAG_Float(sansTail)
+        except:
+            return TAG_String(sansQuotes)
+    elif tailChar.lower() == "d":
+        try:
+            return TAG_Double(sansTail)
+        except:
+            return TAG_String(sansQuotes)
+    elif tailChar == '"':
+        return TAG_String(sansQuotes)
+    #elif determine from context
+    #    ie, if we know that "Pos" is a list of doubles,
+    #    but they have no decimal point or d suffix
+    elif '.' in json:
+        try:
+            return TAG_Double(json)
+        except:
+            return TAG_String(sansQuotes)
+    else:
+        try:
+            return TAG_Int(json)
+        except:
+            return TAG_String(sansQuotes)
+
+def json_to_tag(json):
+    startQuote = None
+    backslashFound = False
+
+    state = {}
+
+    state["name"]  = ''
+    state["native"] = None
+    state["tag"] = None
+
+    result = TAG_Compound()
+    debug = ''
+
+    # This stack points to a container tag
+    state["stackTag"] = [result]
+
+    # Begin parse
+    for i,c in enumerate(json):
+        # TODO Debug for testing the whitespace handler
+        #print c,
+        # i is the index of character c in json
+        if backslashFound:
+            # Previous character was \, ignore this character
+            debug += '?'
+            backslashFound = False
+            continue
+        elif c == '\\':
+            # This charcter is a \, ignore next character
+            debug += '\\'
+            backslashFound = True
+            continue
+        elif c == '"':
+            # Quote found, is it start or end?
+            if startQuote is not None:
+                # It is an end quote, accept the value
+                # Include the quote marks to identify type
+
+                # Note that this might in fact be the tag NAME,
+                # not the tag VALUE. This will be updated when a
+                # colon signifies the value starts next, or when
+                # it is clear the end of the tag has arrived.
+                debug += '"'
+                stringValue = json[startQuote: i + 1]
+                state["native"] = stringValue
+                startQuote = None
+                continue
+            else:
+                # It is a start quote, record the location
+                debug += "'"
+                startQuote = i
+                continue
+        elif startQuote is not None:
+            # We're inside quotes; other cases should be ignored.
+            debug += '~'
+            continue
+        elif c == '{':
+            # New compound tag
+            if i == 0:
+                # This is the starting tag, and accounted for.
+                continue
+            else:
+                # This tag is not accounted for.
+                debug += '{'
+                state["native"] = {}
+                state["tag"] = TAG_Compound()
+                _jsonParser_storeValue(state)
+                continue
+        elif c == '[':
+            # New list tag
+            debug += '['
+            state["native"] = []
+            state["tag"] = TAG_List()
+            _jsonParser_storeValue(state)
+            continue
+        elif c == ']':
+            # End of list tag
+            debug += ']'
+            _jsonParser_exitNestLevel(state)
+            continue
+        elif c == '}':
+            # End of compound tag
+            debug += '}'
+            _jsonParser_exitNestLevel(state)
+            continue
+        elif c == ':':
+            # LHS is name, RHS is value.
+            # If missing, name is not present.
+            debug += ':'
+            if state["name"] == '':
+                state["name"] = state["native"]
+            else:
+                state["name"] += ":" + state["native"]
+            state["native"] = None
+            continue
+        elif c == ',':
+            # Tag separator for lists and compounds
+            debug += ','
+            _jsonParser_storeValue(state)
+            continue
+        else:
+            # Non-string non-container tag
+            debug += '-'
+            if state["native"] is None:
+                # TODO test this; should allow for json files with whitespace
+                #if c in string.whitespace:
+                #    continue
+                state["native"] = ""
+            state["native"] += c
+    if state["native"] is not None:
+        _jsonParser_storeValue(state)
+
+    return result
+
 
