@@ -646,8 +646,8 @@ class TAG_Compound(TAG_Value, collections.MutableMapping):
             result = "{"
         else:
             result = self.name + ":{"
-        for i in self.value:
-            result += i.json + ","
+        for key in sorted(self.keys()):
+            result += self[key].json + ","
         if result[-1] == ",":
             result = result[:-1]
         return result + "}"
