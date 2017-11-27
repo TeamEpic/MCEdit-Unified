@@ -1,5 +1,3 @@
-# vim:set sw=2 sts=2 ts=2:
-
 """
 Named Binary Tag library. Serializes and deserializes TAG_* objects
 to and from binary data. Load a Minecraft level by calling nbt.load().
@@ -59,7 +57,7 @@ TAG_STRING = 8
 TAG_LIST = 9
 TAG_COMPOUND = 10
 TAG_INT_ARRAY = 11
-TAG_SHORT_ARRAY = 12
+TAG_LONG_ARRAY = 12
 
 
 class TAG_Value(object):
@@ -134,7 +132,7 @@ class TAG_Value(object):
         return self
 
     def __repr__(self):
-        return "<%s name=\"%s\" value=%r>" % (str(self.__class__.__name__), self.name, self.value)
+        return "<%s name=\"%s\" value=%r>" % (unicode(self.__class__.__name__), self.name, self.value)
 
     def write_tag(self, buf):
         buf.write(chr(self.tagID))
@@ -154,7 +152,7 @@ class TAG_Value(object):
             TAG_Compound,
             TAG_List,
             TAG_Byte_Array,
-            TAG_Short_Array,
+            TAG_Long_Array,
             TAG_Int_Array
         ]:
             return False
@@ -165,7 +163,7 @@ class TAG_Value(object):
             TAG_Compound,
             TAG_List,
             TAG_Byte_Array,
-            TAG_Short_Array,
+            TAG_Long_Array,
             TAG_Int_Array
         ]:
             return True
@@ -187,17 +185,17 @@ class TAG_Byte(TAG_Value):
     @property
     def json(self):
         """ Convert TAG_Byte to JSON string """
-        if self.name == "":
-            prefix = ""
+        if self.name == u"":
+            prefix = u""
         else:
-            prefix = self.name + ":"
-        return prefix + str(self.value) + "b"
+            prefix = self.name + u":"
+        return prefix + unicode(self.value) + u"b"
 
     @json.setter
     def json(self, newVal):
         """ Parse a string into a TAG_Byte """
         # Trim the type inidicator character, if found
-        if newVal[-1].lower() == "b":
+        if newVal[-1].lower() == u"b":
             valStr = newVal[:-1]
         else:
             valStr = newVal
@@ -214,17 +212,17 @@ class TAG_Short(TAG_Value):
     @property
     def json(self):
         """ Convert TAG_Short to JSON string """
-        if self.name == "":
-            prefix = ""
+        if self.name == u"":
+            prefix = u""
         else:
-            prefix = self.name + ":"
-        return prefix + str(self.value) + "s"
+            prefix = self.name + u":"
+        return prefix + unicode(self.value) + u"s"
 
     @json.setter
     def json(self, newVal):
         """ Parse a string into a TAG_Short """
         # Trim the type inidicator character, if found
-        if newVal[-1].lower() == "s":
+        if newVal[-1].lower() == u"s":
             valStr = newVal[:-1]
         else:
             valStr = newVal
@@ -241,11 +239,11 @@ class TAG_Int(TAG_Value):
     @property
     def json(self):
         """ Convert TAG_Int to JSON string """
-        if self.name == "":
-            prefix = ""
+        if self.name == u"":
+            prefix = u""
         else:
-            prefix = self.name + ":"
-        return prefix + str(self.value)
+            prefix = self.name + u":"
+        return prefix + unicode(self.value)
 
     @json.setter
     def json(self, newVal):
@@ -262,17 +260,17 @@ class TAG_Long(TAG_Value):
     @property
     def json(self):
         """ Convert TAG_Long to JSON string """
-        if self.name == "":
-            prefix = ""
+        if self.name == u"":
+            prefix = u""
         else:
-            prefix = self.name + ":"
-        return prefix + str(self.value) + "l"
+            prefix = self.name + u":"
+        return prefix + unicode(self.value) + u"l"
 
     @json.setter
     def json(self, newVal):
         """ Parse a string into a TAG_Long """
         # Trim the type inidicator character, if found
-        if newVal[-1].lower() == "l":
+        if newVal[-1].lower() == u"l":
             valStr = newVal[:-1]
         else:
             valStr = newVal
@@ -289,18 +287,18 @@ class TAG_Float(TAG_Value):
     @property
     def json(self):
         """ Convert TAG_Float to JSON string """
-        if self.name == "":
-            prefix = ""
+        if self.name == u"":
+            prefix = u""
         else:
-            prefix = self.name + ":"
+            prefix = self.name + u":"
 
-        return prefix + str(self.value) + "f"
+        return prefix + unicode(self.value) + u"f"
 
     @json.setter
     def json(self, newVal):
         """ Parse a string into a TAG_Float """
         # Trim the type inidicator character, if found
-        if newVal[-1].lower() == "f":
+        if newVal[-1].lower() == u"f":
             valStr = newVal[:-1]
         else:
             valStr = newVal
@@ -317,18 +315,18 @@ class TAG_Double(TAG_Value):
     @property
     def json(self):
         """ Convert TAG_Double to JSON string """
-        if self.name == "":
-            prefix = ""
+        if self.name == u"":
+            prefix = u""
         else:
-            prefix = self.name + ":"
+            prefix = self.name + u":"
 
-        return prefix + str(self.value) + "d"
+        return prefix + unicode(self.value) + u"d"
 
     @json.setter
     def json(self, newVal):
         """ Parse a string into a TAG_Double """
         # Trim the type inidicator character, if found
-        if newVal[-1].lower() == "d":
+        if newVal[-1].lower() == u"d":
             valStr = newVal[:-1]
         else:
             valStr = newVal
@@ -371,10 +369,26 @@ class TAG_Byte_Array(TAG_Value):
         value_str = self.value.tostring()
         buf.write(struct.pack(">I%ds" % (len(value_str),), self.value.size, value_str))
 
+    @property
+    def json(self):
+        """ Convert TAG_Byte_Array to JSON string """
+        if self.name == u"":
+            result = u"["
+        else:
+            result = self.name + u":["
+        # TODO parsing needs to be double checked
+        for val in self.value:
+            result += unicode(val) + u"b,"
+        if result[-1] == u",":
+            result = result[:-1]
+        else:
+            result = result[:-1] + u"<empty byte array>"
+        return result + u"]"
+
     def eq(self,other):
         if type(other) not in [
             TAG_Byte_Array,
-            TAG_Short_Array,
+            TAG_Long_Array,
             TAG_Int_Array
         ]:
             return False
@@ -388,7 +402,7 @@ class TAG_Byte_Array(TAG_Value):
     def ne(self,other):
         if type(other) not in [
             TAG_Byte_Array,
-            TAG_Short_Array,
+            TAG_Long_Array,
             TAG_Int_Array
         ]:
             return True
@@ -406,12 +420,43 @@ class TAG_Int_Array(TAG_Byte_Array):
     __slots__ = ('_name', '_value')
     dtype = numpy.dtype('>u4')
 
+    @property
+    def json(self):
+        """ Convert TAG_Int_Array to JSON string """
+        if self.name == u"":
+            result = u"["
+        else:
+            result = self.name + u":["
+        # TODO parsing needs to be double checked
+        for val in self.value:
+            result += unicode(val) + u","
+        if result[-1] == u",":
+            result = result[:-1]
+        elif result[-1] == u"[":
+            result += ","
+        return result + u"]"
 
-class TAG_Short_Array(TAG_Int_Array):
-    """An array of big-endian 16-bit integers. Not official, but used by some mods."""
-    tagID = TAG_SHORT_ARRAY
+class TAG_Long_Array(TAG_Int_Array):
+    """An array of big-endian 64-bit integers. This is official - short arrays are not."""
+    tagID = TAG_LONG_ARRAY
     __slots__ = ('_name', '_value')
-    dtype = numpy.dtype('>u2')
+    dtype = numpy.dtype('>u8')
+
+    @property
+    def json(self):
+        """ Convert TAG_Long_Array to JSON string """
+        if self.name == "":
+            result = u"["
+        else:
+            result = self.name + u":["
+        # TODO parsing needs to be double checked
+        for val in self.value:
+            result += unicode(val) + u"l,"
+        if result[-1] == ",":
+            result = result[:-1]
+        else:
+            result = result[:-1] + u"<empty long array>"
+        return result + u"]"
 
 
 class TAG_String(TAG_Value):
@@ -498,7 +543,6 @@ def write_string(string, buf):
 
 # noinspection PyMissingConstructor
 
-
 class TAG_Compound(TAG_Value, collections.MutableMapping):
     """A heterogenous list of named tags. Names must be unique within
     the TAG_Compound. Add tags to the compound using the subscript
@@ -515,7 +559,7 @@ class TAG_Compound(TAG_Value, collections.MutableMapping):
         self.name = name
 
     def __repr__(self):
-        return "<%s name='%s' keys=%r>" % (str(self.__class__.__name__), self.name, self.keys())
+        return "<%s name='%s' keys=%r>" % (unicode(self.__class__.__name__), self.name, self.keys())
 
     def data_type(self, val):
         for i in val:
@@ -840,7 +884,7 @@ tag_classes = {}
 
 for c in (
 TAG_Byte, TAG_Short, TAG_Int, TAG_Long, TAG_Float, TAG_Double, TAG_String, TAG_Byte_Array, TAG_List, TAG_Compound,
-TAG_Int_Array, TAG_Short_Array):
+TAG_Int_Array, TAG_Long_Array):
     tag_classes[c.tagID] = c
 
 
@@ -941,7 +985,7 @@ def littleEndianNBT():
     TAG_Float.fmt = struct.Struct("<f")
     TAG_Double.fmt = struct.Struct("<d")
     TAG_Int_Array.dtype = numpy.dtype("<u4")
-    TAG_Short_Array.dtype = numpy.dtype("<u2")
+    TAG_Long_Array.dtype = numpy.dtype("<u8")
     global write_string
     write_string = override_write_string
     TAG_Byte_Array.write_value = override_byte_array_write_value
@@ -954,7 +998,7 @@ def littleEndianNBT():
     TAG_Float.fmt = struct.Struct(">f")
     TAG_Double.fmt = struct.Struct(">d")
     TAG_Int_Array.dtype = numpy.dtype(">u4")
-    TAG_Short_Array.dtype = numpy.dtype(">u2")
+    TAG_Long_Array.dtype = numpy.dtype(">u8")
     write_string = reset_write_string
     TAG_Byte_Array.write_value = reset_byte_array_write_value
 
@@ -991,7 +1035,7 @@ try:
 #         log.warning("PE support debug mode is activated. Using full Python NBT support!")
 #     else:
         from _nbt import (load, TAG_Byte, TAG_Short, TAG_Int, TAG_Long, TAG_Float, TAG_Double, TAG_String,
-                          TAG_Byte_Array, TAG_List, TAG_Compound, TAG_Int_Array, TAG_Short_Array, NBTFormatError,
+                          TAG_Byte_Array, TAG_List, TAG_Compound, TAG_Int_Array, TAG_Long_Array, NBTFormatError,
                           littleEndianNBT, nested_string, gunzip, hexdump)
 except ImportError as err:
     log.error("Failed to import Cythonized nbt file. Running on (very slow) pure-python nbt fallback.")
