@@ -184,25 +184,13 @@ class TAG_Byte(TAG_Value):
     fmt = struct.Struct(">b")
     data_type = int
 
-    @property
-    def json(self):
+    def json(self,sort=None):
         """ Convert TAG_Byte to JSON string """
         if self.name == u"":
             prefix = u""
         else:
             prefix = self.name + u":"
         return prefix + unicode(self.value) + u"b"
-
-    @json.setter
-    def json(self, newVal):
-        """ Parse a string into a TAG_Byte """
-        # Trim the type inidicator character, if found
-        if newVal[-1].lower() == u"b":
-            valStr = newVal[:-1]
-        else:
-            valStr = newVal
-
-        self.value = valStr
 
 
 class TAG_Short(TAG_Value):
@@ -211,25 +199,13 @@ class TAG_Short(TAG_Value):
     fmt = struct.Struct(">h")
     data_type = int
 
-    @property
-    def json(self):
+    def json(self,sort=None):
         """ Convert TAG_Short to JSON string """
         if self.name == u"":
             prefix = u""
         else:
             prefix = self.name + u":"
         return prefix + unicode(self.value) + u"s"
-
-    @json.setter
-    def json(self, newVal):
-        """ Parse a string into a TAG_Short """
-        # Trim the type inidicator character, if found
-        if newVal[-1].lower() == u"s":
-            valStr = newVal[:-1]
-        else:
-            valStr = newVal
-
-        self.value = valStr
 
 
 class TAG_Int(TAG_Value):
@@ -238,19 +214,13 @@ class TAG_Int(TAG_Value):
     fmt = struct.Struct(">i")
     data_type = int
 
-    @property
-    def json(self):
+    def json(self,sort=None):
         """ Convert TAG_Int to JSON string """
         if self.name == u"":
             prefix = u""
         else:
             prefix = self.name + u":"
         return prefix + unicode(self.value)
-
-    @json.setter
-    def json(self, newVal):
-        """ Parse a string into a TAG_Int """
-        self.value = newVal
 
 
 class TAG_Long(TAG_Value):
@@ -259,25 +229,13 @@ class TAG_Long(TAG_Value):
     fmt = struct.Struct(">q")
     data_type = long
 
-    @property
-    def json(self):
+    def json(self,sort=None):
         """ Convert TAG_Long to JSON string """
         if self.name == u"":
             prefix = u""
         else:
             prefix = self.name + u":"
         return prefix + unicode(self.value) + u"l"
-
-    @json.setter
-    def json(self, newVal):
-        """ Parse a string into a TAG_Long """
-        # Trim the type inidicator character, if found
-        if newVal[-1].lower() == u"l":
-            valStr = newVal[:-1]
-        else:
-            valStr = newVal
-
-        self.value = valStr
 
 
 class TAG_Float(TAG_Value):
@@ -286,8 +244,7 @@ class TAG_Float(TAG_Value):
     fmt = struct.Struct(">f")
     data_type = float
 
-    @property
-    def json(self):
+    def json(self,sort=None):
         """ Convert TAG_Float to JSON string """
         if self.name == u"":
             prefix = u""
@@ -296,17 +253,6 @@ class TAG_Float(TAG_Value):
 
         return prefix + unicode(self.value) + u"f"
 
-    @json.setter
-    def json(self, newVal):
-        """ Parse a string into a TAG_Float """
-        # Trim the type inidicator character, if found
-        if newVal[-1].lower() == u"f":
-            valStr = newVal[:-1]
-        else:
-            valStr = newVal
-
-        self.value = valStr
-
 
 class TAG_Double(TAG_Value):
     __slots__ = ('_name', '_value')
@@ -314,8 +260,7 @@ class TAG_Double(TAG_Value):
     fmt = struct.Struct(">d")
     data_type = float
 
-    @property
-    def json(self):
+    def json(self,sort=None):
         """ Convert TAG_Double to JSON string """
         if self.name == u"":
             prefix = u""
@@ -323,17 +268,6 @@ class TAG_Double(TAG_Value):
             prefix = self.name + u":"
 
         return prefix + unicode(self.value) + u"d"
-
-    @json.setter
-    def json(self, newVal):
-        """ Parse a string into a TAG_Double """
-        # Trim the type inidicator character, if found
-        if newVal[-1].lower() == u"d":
-            valStr = newVal[:-1]
-        else:
-            valStr = newVal
-
-        self.value = valStr
 
 
 class TAG_Byte_Array(TAG_Value):
@@ -371,8 +305,7 @@ class TAG_Byte_Array(TAG_Value):
         value_str = self.value.tostring()
         buf.write(struct.pack(">I%ds" % (len(value_str),), self.value.size, value_str))
 
-    @property
-    def json(self):
+    def json(self,sort=None):
         """ Convert TAG_Byte_Array to JSON string """
         if self.name == u"":
             result = u"["
@@ -422,8 +355,7 @@ class TAG_Int_Array(TAG_Byte_Array):
     __slots__ = ('_name', '_value')
     dtype = numpy.dtype('>u4')
 
-    @property
-    def json(self):
+    def json(self,sort=None):
         """ Convert TAG_Int_Array to JSON string """
         if self.name == u"":
             result = u"["
@@ -444,8 +376,7 @@ class TAG_Long_Array(TAG_Int_Array):
     __slots__ = ('_name', '_value')
     dtype = numpy.dtype('>u8')
 
-    @property
-    def json(self):
+    def json(self,sort=None):
         """ Convert TAG_Long_Array to JSON string """
         if self.name == "":
             result = u"["
@@ -499,8 +430,7 @@ class TAG_String(TAG_Value):
     def decode(self, charset):
         self.value.decode(charset)
 
-    @property
-    def json(self):
+    def json(self,sort=None):
         """ Convert TAG_String to JSON string """
         try:
             ownName = self.name
@@ -512,17 +442,6 @@ class TAG_String(TAG_Value):
             prefix = u'"'
 
         return prefix + self.value.replace(u'\\\\',u'\\').replace(u'"',u'\\"') + u'"'
-
-    @json.setter
-    def json(self, newVal):
-        """ Parse a string into a TAG_Double """
-        # Trim the type inidicator character, if found
-        if newVal[0] == ur'"':
-            valStr = newVal[1:-1]
-        else:
-            valStr = newVal
-
-        self._value = unicode(valStr)
 
 string_len_fmt = struct.Struct(">H")
 
@@ -685,18 +604,28 @@ class TAG_Compound(TAG_Value, collections.MutableMapping):
         return True
 
 
-    @property
-    def json(self):
+    def json(self,sort=None):
         """ Convert TAG_Compound to JSON string """
         if self.name == "":
             result = u"{"
         else:
             result = self.name + u":{"
-        if "id" in self.keys():
-            result += self["id"].json + u","
-        for key in sorted(self.keys()):
-            if key != "id":
-                result += self[key].json + u","
+        if sort==None:
+            for key in self.keys():
+                result += self[key].json(sort) + u","
+        elif (
+            (type(sort) == list) or
+            (type(sort) == tuple)
+        ):
+            for sortKey in sort:
+                if sortKey in self.keys():
+                    result += self[sortKey].json(sort) + u","
+            for key in sorted(self.keys()):
+                if key not in sort:
+                    result += self[key].json(sort) + u","
+        else:
+            for key in sorted(self.keys()):
+                result += self[key].json(sort) + u","
         if result[-1] == u",":
             result = result[:-1]
         return result + u"}"
@@ -741,7 +670,7 @@ class TAG_Compound(TAG_Value, collections.MutableMapping):
     def update(self,newTag):
         for aKey in newTag.keys():
             if aKey not in self:
-                json = newTag[aKey].json
+                json = newTag[aKey].json()
                 newSubTag = json_to_tag(json)
                 if newSubTag.name != aKey:
                     newSubTag = newSubTag[aKey]
@@ -840,8 +769,7 @@ class TAG_List(TAG_Value, collections.MutableSequence):
         value.name = ""
         self.value.insert(index, value)
 
-    @property
-    def json(self):
+    def json(self,sort=None):
         """ Convert TAG_List to JSON string """
         if self.name == "":
             result = u"["
@@ -849,7 +777,7 @@ class TAG_List(TAG_Value, collections.MutableSequence):
             result = self.name + u":["
         # TODO parsing needs to be double checked
         for i in self.value:
-            result += i.json + u","
+            result += i.json(sort) + u","
         if result[-1] == u",":
             result = result[:-1]
         return result + u"]"
