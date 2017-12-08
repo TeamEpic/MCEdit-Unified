@@ -441,7 +441,7 @@ class TAG_String(TAG_Value):
         except AttributeError:
             prefix = u'"'
 
-        return prefix + self.value.replace(u'\\\\',u'\\').replace(u'"',u'\\"') + u'"'
+        return prefix + self.value.replace(u'\\\\',u'\\').replace(u'\n',u'\\n"').replace(u'"',u'\\"') + u'"'
 
 string_len_fmt = struct.Struct(">H")
 
