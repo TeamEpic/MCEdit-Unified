@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Named Binary Tag library. Serializes and deserializes TAG_* objects
 to and from binary data. Load a Minecraft level by calling nbt.load().
@@ -503,13 +505,13 @@ class TAG_String(TAG_Value):
         try:
             ownName = self.name
             if ownName == "":
-                prefix = '"'
+                prefix = u'"'
             else:
-                prefix = self.name + ':"'
+                prefix = self.name + u':"'
         except AttributeError:
-            prefix = '"'
+            prefix = u'"'
 
-        return prefix + self.value + '"'
+        return prefix + self.value.replace(u'\\\\',u'\\').replace(u'"',u'\\"') + u'"'
 
     @json.setter
     def json(self, newVal):
@@ -687,14 +689,17 @@ class TAG_Compound(TAG_Value, collections.MutableMapping):
     def json(self):
         """ Convert TAG_Compound to JSON string """
         if self.name == "":
-            result = "{"
+            result = u"{"
         else:
-            result = self.name + ":{"
+            result = self.name + u":{"
+        if "id" in self.keys():
+            result += self["id"].json + u","
         for key in sorted(self.keys()):
-            result += self[key].json + ","
-        if result[-1] == ",":
+            if key != "id":
+                result += self[key].json + u","
+        if result[-1] == u",":
             result = result[:-1]
-        return result + "}"
+        return result + u"}"
 
     def eq(self,other):
         if type(other) != TAG_Compound:
@@ -839,15 +844,15 @@ class TAG_List(TAG_Value, collections.MutableSequence):
     def json(self):
         """ Convert TAG_List to JSON string """
         if self.name == "":
-            result = "["
+            result = u"["
         else:
-            result = self.name + ":["
+            result = self.name + u":["
         # TODO parsing needs to be double checked
         for i in self.value:
-            result += i.json + ","
-        if result[-1] == ",":
+            result += i.json + u","
+        if result[-1] == u",":
             result = result[:-1]
-        return result + "]"
+        return result + u"]"
 
     def eq(self,other):
         if type(other) != TAG_List:
