@@ -805,10 +805,11 @@ class TAG_List(TAG_Value, collections.MutableSequence):
     def issubset(self,other):
         if type(other) != TAG_List:
             return False
-        if len(self.value) != len(other.value):
-            return False
         for i in range(len(self.value)):
             # Order insensitive
+            # Read this as:
+            # if this list element is a subset of none of other's elements:
+            #   then this list is not a subset of the other list
             if not any(self[i].issubset(other[j]) for j in range(len(other.value))):
                 return False
         return True
