@@ -441,7 +441,7 @@ class TAG_String(TAG_Value):
         except AttributeError:
             prefix = u'"'
 
-        return prefix + self.value.replace(u'\\\\',u'\\').replace(u'\n',u'\\n"').replace(u'"',u'\\"') + u'"'
+        return prefix + self.value.replace(u'\\',u'\\\\').replace(u'\n',u'\\n"').replace(u'"',u'\\"') + u'"'
 
 string_len_fmt = struct.Struct(">H")
 
@@ -1085,7 +1085,7 @@ def _jsonParser_jsonToTag(json):
         except:
             return TAG_String(sansQuotes)
     elif tailChar == '"':
-        return TAG_String(sansQuotes)
+        return TAG_String(sansQuotes.replace(u'\\"',u'"').replace(u'\\n',u'\n"').replace(u'\\\\',u'\\'))
     #elif determine from context
     #    ie, if we know that "Pos" is a list of doubles,
     #    but they have no decimal point or d suffix
