@@ -186,9 +186,8 @@ class TAG_Byte(TAG_Value):
 
     def json(self,sort=None):
         """ Convert TAG_Byte to JSON string """
-        if self.name == u"":
-            prefix = u""
-        else:
+        prefix = u""
+        if len(self.name) != 0:
             prefix = self.name + u":"
         return prefix + unicode(self.value) + u"b"
 
@@ -201,9 +200,8 @@ class TAG_Short(TAG_Value):
 
     def json(self,sort=None):
         """ Convert TAG_Short to JSON string """
-        if self.name == u"":
-            prefix = u""
-        else:
+        prefix = u""
+        if len(self.name) != 0:
             prefix = self.name + u":"
         return prefix + unicode(self.value) + u"s"
 
@@ -216,9 +214,8 @@ class TAG_Int(TAG_Value):
 
     def json(self,sort=None):
         """ Convert TAG_Int to JSON string """
-        if self.name == u"":
-            prefix = u""
-        else:
+        prefix = u""
+        if len(self.name) != 0:
             prefix = self.name + u":"
         return prefix + unicode(self.value)
 
@@ -231,9 +228,8 @@ class TAG_Long(TAG_Value):
 
     def json(self,sort=None):
         """ Convert TAG_Long to JSON string """
-        if self.name == u"":
-            prefix = u""
-        else:
+        prefix = u""
+        if len(self.name) != 0:
             prefix = self.name + u":"
         return prefix + unicode(self.value) + u"l"
 
@@ -246,9 +242,8 @@ class TAG_Float(TAG_Value):
 
     def json(self,sort=None):
         """ Convert TAG_Float to JSON string """
-        if self.name == u"":
-            prefix = u""
-        else:
+        prefix = u""
+        if len(self.name) != 0:
             prefix = self.name + u":"
 
         return prefix + unicode(self.value) + u"f"
@@ -262,9 +257,8 @@ class TAG_Double(TAG_Value):
 
     def json(self,sort=None):
         """ Convert TAG_Double to JSON string """
-        if self.name == u"":
-            prefix = u""
-        else:
+        prefix = u""
+        if len(self.name) != 0:
             prefix = self.name + u":"
 
         return prefix + unicode(self.value) + u"d"
@@ -307,9 +301,8 @@ class TAG_Byte_Array(TAG_Value):
 
     def json(self,sort=None):
         """ Convert TAG_Byte_Array to JSON string """
-        if self.name == u"":
-            result = u"["
-        else:
+        result = u"["
+        if len(self.name) != 0:
             result = self.name + u":["
         # TODO parsing needs to be double checked
         for val in self.value:
@@ -317,7 +310,7 @@ class TAG_Byte_Array(TAG_Value):
         if result[-1] == u",":
             result = result[:-1]
         else:
-            result = result[:-1] + u"<empty byte array>"
+            result = result + u"<empty byte array>"
         return result + u"]"
 
     def eq(self,other):
@@ -357,9 +350,8 @@ class TAG_Int_Array(TAG_Byte_Array):
 
     def json(self,sort=None):
         """ Convert TAG_Int_Array to JSON string """
-        if self.name == u"":
-            result = u"["
-        else:
+        result = u"["
+        if len(self.name) != 0:
             result = self.name + u":["
         # TODO parsing needs to be double checked
         for val in self.value:
@@ -378,9 +370,8 @@ class TAG_Long_Array(TAG_Int_Array):
 
     def json(self,sort=None):
         """ Convert TAG_Long_Array to JSON string """
-        if self.name == "":
-            result = u"["
-        else:
+        result = u"["
+        if len(self.name) != 0:
             result = self.name + u":["
         # TODO parsing needs to be double checked
         for val in self.value:
@@ -388,7 +379,7 @@ class TAG_Long_Array(TAG_Int_Array):
         if result[-1] == ",":
             result = result[:-1]
         else:
-            result = result[:-1] + u"<empty long array>"
+            result = result + u"<empty long array>"
         return result + u"]"
 
 

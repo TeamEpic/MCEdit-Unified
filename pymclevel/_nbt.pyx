@@ -158,6 +158,34 @@ cdef class TAG_Value:
     def isCompound(self):
         return False
 
+    def eq(self,other):
+        if type(other) in [
+            TAG_Compound,
+            TAG_List,
+            TAG_Byte_Array,
+            TAG_Long_Array,
+            TAG_Int_Array
+        ]:
+            return False
+        return self.value == other.value
+
+    def ne(self,other):
+        if type(other) in [
+            TAG_Compound,
+            TAG_List,
+            TAG_Byte_Array,
+            TAG_Long_Array,
+            TAG_Int_Array
+        ]:
+            return True
+        return self.value != other.value
+
+    def issubset(self,other):
+        return self.eq(other)
+
+    def update(self,newTag):
+        self.value = newTag
+
 
 cdef class TAG_Byte(TAG_Value):
     cdef public char value
@@ -169,6 +197,13 @@ cdef class TAG_Byte(TAG_Value):
         self.value = value
         self.name = name
         self.tagID = _ID_BYTE
+
+    def json(self,sort=None):
+        """ Convert TAG_Byte to JSON string """
+        prefix = u""
+        if len(self.name) != 0:
+            prefix = self.name + u":"
+        return prefix + unicode(self.value) + u"b"
 
 
 cdef class TAG_Short(TAG_Value):
@@ -182,6 +217,13 @@ cdef class TAG_Short(TAG_Value):
         self.name = name
         self.tagID = _ID_SHORT
 
+    def json(self,sort=None):
+        """ Convert TAG_Short to JSON string """
+        prefix = u""
+        if len(self.name) != 0:
+            prefix = self.name + u":"
+        return prefix + unicode(self.value) + u"s"
+
 
 cdef class TAG_Int(TAG_Value):
     cdef public int value
@@ -193,6 +235,13 @@ cdef class TAG_Int(TAG_Value):
         self.value = value
         self.name = name
         self.tagID = _ID_INT
+
+    def json(self,sort=None):
+        """ Convert TAG_Int to JSON string """
+        prefix = u""
+        if len(self.name) != 0:
+            prefix = self.name + u":"
+        return prefix + unicode(self.value)
 
 
 cdef class TAG_Long(TAG_Value):
@@ -206,6 +255,13 @@ cdef class TAG_Long(TAG_Value):
         self.name = name
         self.tagID = _ID_LONG
 
+    def json(self,sort=None):
+        """ Convert TAG_Long to JSON string """
+        prefix = u""
+        if len(self.name) != 0:
+            prefix = self.name + u":"
+        return prefix + unicode(self.value) + u"l"
+
 
 cdef class TAG_Float(TAG_Value):
     cdef public float value
@@ -218,6 +274,14 @@ cdef class TAG_Float(TAG_Value):
         self.name = name
         self.tagID = _ID_FLOAT
 
+    def json(self,sort=None):
+        """ Convert TAG_Float to JSON string """
+        prefix = u""
+        if len(self.name) != 0:
+            prefix = self.name + u":"
+
+        return prefix + unicode(self.value) + u"f"
+
 
 cdef class TAG_Double(TAG_Value):
     cdef public double value
@@ -229,6 +293,14 @@ cdef class TAG_Double(TAG_Value):
         self.value = value
         self.name = name
         self.tagID = _ID_DOUBLE
+
+    def json(self,sort=None):
+        """ Convert TAG_Double to JSON string """
+        prefix = u""
+        if len(self.name) != 0:
+            prefix = self.name + u":"
+
+        return prefix + unicode(self.value) + u"d"
 
 
 cdef class TAG_Byte_Array(TAG_Value):
@@ -259,6 +331,48 @@ cdef class TAG_Byte_Array(TAG_Value):
     def copy(self):
         return TAG_Byte_Array(numpy.array(self.value), self.name)
 
+    def json(self,sort=None):
+        """ Convert TAG_Byte_Array to JSON string """
+        result = u"["
+        if len(self.name) != 0:
+            result = self.name + u":["
+        # TODO parsing needs to be double checked
+        for val in self.value:
+            result += unicode(val) + u"b,"
+        if result[-1] == u",":
+            result = result[:-1]
+        else:
+            result = result + u"<empty byte array>"
+        return result + u"]"
+
+    def eq(self,other):
+        if type(other) not in [
+            TAG_Byte_Array,
+            TAG_Long_Array,
+            TAG_Int_Array
+        ]:
+            return False
+        if len(self) != len(other):
+            return False
+        for i in range(len(self)):
+            if self.value[i].ne(other.value[i]):
+                return False
+        return True
+
+    def ne(self,other):
+        if type(other) not in [
+            TAG_Byte_Array,
+            TAG_Long_Array,
+            TAG_Int_Array
+        ]:
+            return True
+        if len(self) != len(other):
+            return True
+        for i in range(len(self)):
+            if self.value[i].ne(other.value[i]):
+                return True
+        return False
+
 cdef class TAG_Int_Array(TAG_Value):
     cdef public object value
     dtype = numpy.dtype('>u4')
@@ -286,6 +400,48 @@ cdef class TAG_Int_Array(TAG_Value):
 
     def copy(self):
         return TAG_Int_Array(numpy.array(self.value), self.name)
+
+    def json(self,sort=None):
+        """ Convert TAG_Int_Array to JSON string """
+        result = u"["
+        if len(self.name) != 0:
+            result = self.name + u":["
+        # TODO parsing needs to be double checked
+        for val in self.value:
+            result += unicode(val) + u","
+        if result[-1] == u",":
+            result = result[:-1]
+        elif result[-1] == u"[":
+            result += ","
+        return result + u"]"
+
+    def eq(self,other):
+        if type(other) not in [
+            TAG_Byte_Array,
+            TAG_Long_Array,
+            TAG_Int_Array
+        ]:
+            return False
+        if len(self) != len(other):
+            return False
+        for i in range(len(self)):
+            if self.value[i].ne(other.value[i]):
+                return False
+        return True
+
+    def ne(self,other):
+        if type(other) not in [
+            TAG_Byte_Array,
+            TAG_Long_Array,
+            TAG_Int_Array
+        ]:
+            return True
+        if len(self) != len(other):
+            return True
+        for i in range(len(self)):
+            if self.value[i].ne(other.value[i]):
+                return True
+        return False
 
 cdef class TAG_Long_Array(TAG_Value):
     cdef public object value
@@ -317,6 +473,48 @@ cdef class TAG_Long_Array(TAG_Value):
     def copy(self):
         return TAG_Long_Array(numpy.array(self.value), self.name)
 
+    def json(self,sort=None):
+        """ Convert TAG_Long_Array to JSON string """
+        result = u"["
+        if len(self.name) != 0:
+            result = self.name + u":["
+        # TODO parsing needs to be double checked
+        for val in self.value:
+            result += unicode(val) + u"l,"
+        if result[-1] == ",":
+            result = result[:-1]
+        else:
+            result = result + u"<empty long array>"
+        return result + u"]"
+
+    def eq(self,other):
+        if type(other) not in [
+            TAG_Byte_Array,
+            TAG_Long_Array,
+            TAG_Int_Array
+        ]:
+            return False
+        if len(self) != len(other):
+            return False
+        for i in range(len(self)):
+            if self.value[i].ne(other.value[i]):
+                return False
+        return True
+
+    def ne(self,other):
+        if type(other) not in [
+            TAG_Byte_Array,
+            TAG_Long_Array,
+            TAG_Int_Array
+        ]:
+            return True
+        if len(self) != len(other):
+            return True
+        for i in range(len(self)):
+            if self.value[i].ne(other.value[i]):
+                return True
+        return False
+
 cdef class TAG_String(TAG_Value):
     cdef unicode _value
 
@@ -336,6 +534,19 @@ cdef class TAG_String(TAG_Value):
 
     cdef void save_value(self, buf):
         save_string(self._value.encode('utf-8'), buf)
+
+    def json(self,sort=None):
+        """ Convert TAG_String to JSON string """
+        try:
+            ownName = self.name
+            if ownName == "":
+                prefix = u'"'
+            else:
+                prefix = self.name + u':"'
+        except AttributeError:
+            prefix = u'"'
+
+        return prefix + self.value.replace(u'\\',u'\\\\').replace(u'\n',u'\\n"').replace(u'"',u'\\"') + u'"'
 
 
 cdef class _TAG_List(TAG_Value):
@@ -416,6 +627,51 @@ cdef class _TAG_List(TAG_Value):
     @property
     def tagClass(self):
         return tag_classes[self.list_type]
+
+    def json(self,sort=None):
+        """ Convert TAG_List to JSON string """
+        if self.name == "":
+            result = u"["
+        else:
+            result = self.name + u":["
+        # TODO parsing needs to be double checked
+        for i in self.value:
+            result += i.json(sort) + u","
+        if result[-1] == u",":
+            result = result[:-1]
+        return result + u"]"
+
+    def eq(self,other):
+        if type(other) != TAG_List:
+            return False
+        if len(self.value) != len(other.value):
+            return False
+        for i in range(len(self.value)):
+            if self[i].ne(other[i]):
+                return False
+        return True
+
+    def ne(self,other):
+        if type(other) != TAG_List:
+            return True
+        if len(self.value) != len(other.value):
+            return True
+        for i in range(len(self.value)):
+            if self[i].ne(other[i]):
+                return True
+        return False
+
+    def issubset(self,other):
+        if type(other) != TAG_List:
+            return False
+        for i in range(len(self.value)):
+            # Order insensitive
+            # Read this as:
+            # if this list element is a subset of none of other's elements:
+            #   then this list is not a subset of the other list
+            if not any(self[i].issubset(other[j]) for j in range(len(other.value))):
+                return False
+        return True
 
 
 class TAG_List(_TAG_List, collections.MutableSequence):
@@ -519,6 +775,80 @@ cdef class _TAG_Compound(TAG_Value):
 
     def isCompound(self):
         return True
+
+    def json(self,sort=None):
+        """ Convert TAG_Compound to JSON string """
+        if self.name == "":
+            result = u"{"
+        else:
+            result = self.name + u":{"
+        if sort==None:
+            for key in self.keys():
+                result += self[key].json(sort) + u","
+        elif (
+            (type(sort) == list) or
+            (type(sort) == tuple)
+        ):
+            for sortKey in sort:
+                if sortKey in self.keys():
+                    result += self[sortKey].json(sort) + u","
+            for key in sorted(self.keys()):
+                if key not in sort:
+                    result += self[key].json(sort) + u","
+        else:
+            for key in sorted(self.keys()):
+                result += self[key].json(sort) + u","
+        if result[-1] == u",":
+            result = result[:-1]
+        return result + u"}"
+
+    def eq(self,other):
+        if type(other) != TAG_Compound:
+            return False
+        if len(self) != len(other):
+            return False
+        try:
+            for aKey in self.keys():
+                if self[aKey].ne(other[aKey]):
+                    return False
+        except:
+            return False
+        return True
+
+    def ne(self,other):
+        if type(other) != TAG_Compound:
+            return True
+        if len(self) != len(other):
+            return True
+        try:
+            for aKey in self.keys():
+                if self[aKey].ne(other[aKey]):
+                    return True
+        except:
+            return True
+        return False
+
+    def issubset(self,other):
+        if type(other) != TAG_Compound:
+            return False
+        try:
+            for aKey in self.keys():
+                if not self[aKey].issubset(other[aKey]):
+                    return False
+        except:
+            return False
+        return True
+
+    def update(self,newTag):
+        for aKey in newTag.keys():
+            if aKey not in self:
+                json = newTag[aKey].json()
+                newSubTag = json_to_tag(json)
+                if newSubTag.name != aKey:
+                    newSubTag = newSubTag[aKey]
+                self[aKey] = newSubTag
+            else:
+                self[aKey].update(newTag[aKey])
 
 class TAG_Compound(_TAG_Compound, collections.MutableMapping):
     pass
