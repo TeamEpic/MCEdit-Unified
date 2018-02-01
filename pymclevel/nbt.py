@@ -175,7 +175,7 @@ class TAG_Value(object):
         return self.eq(other)
 
     def update(self,newTag):
-        self.value = newTag
+        self.value = newTag.value
 
 
 class TAG_Byte(TAG_Value):
