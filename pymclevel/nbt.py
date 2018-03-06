@@ -301,16 +301,14 @@ class TAG_Byte_Array(TAG_Value):
 
     def json(self,sort=None):
         """ Convert TAG_Byte_Array to JSON string """
-        result = u"["
+        result = u"[B;"
         if len(self.name) != 0:
-            result = self.name + u":["
+            result = self.name + u":[B;"
         # TODO parsing needs to be double checked
         for val in self.value:
             result += unicode(val) + u"b,"
         if result[-1] == u",":
             result = result[:-1]
-        else:
-            result = result + u"<empty byte array>"
         return result + u"]"
 
     def eq(self,other):
@@ -350,16 +348,14 @@ class TAG_Int_Array(TAG_Byte_Array):
 
     def json(self,sort=None):
         """ Convert TAG_Int_Array to JSON string """
-        result = u"["
+        result = u"[I;"
         if len(self.name) != 0:
-            result = self.name + u":["
+            result = self.name + u":[I;"
         # TODO parsing needs to be double checked
         for val in self.value:
             result += unicode(val) + u","
         if result[-1] == u",":
             result = result[:-1]
-        elif result[-1] == u"[":
-            result += ","
         return result + u"]"
 
 class TAG_Long_Array(TAG_Int_Array):
@@ -370,16 +366,14 @@ class TAG_Long_Array(TAG_Int_Array):
 
     def json(self,sort=None):
         """ Convert TAG_Long_Array to JSON string """
-        result = u"["
+        result = u"[L;"
         if len(self.name) != 0:
-            result = self.name + u":["
+            result = self.name + u":[L;"
         # TODO parsing needs to be double checked
         for val in self.value:
             result += unicode(val) + u"l,"
         if result[-1] == ",":
             result = result[:-1]
-        else:
-            result = result + u"<empty long array>"
         return result + u"]"
 
 
@@ -996,27 +990,43 @@ def _jsonParser_storeValue(state):
 
     # Determine how to index where the new value goes,
     # and put it there.
-    if type(state["tag"]) is TAG_Compound:
-        state["tag"].name = state["name"]
-    elif type(state["tag"]) is TAG_List:
-        state["tag"].name = state["name"]
-    else:
+    thisTagType = type(state["tag"])
+    isContainer = (
+        thisTagType is TAG_Compound or
+        thisTagType is TAG_List or
+        thisTagType is TAG_Byte_Array or
+        thisTagType is TAG_Int_Array or
+        thisTagType is TAG_Long_Array
+    )
+
+    if not isContainer:
         # type and value must be determined
         state["tag"] = _jsonParser_jsonToTag(state["native"])
-        state["tag"].name = state["name"]
+    state["tag"].name = state["name"]
 
     # Determine and use the correct function
     # to store the new tag in its container
-    if type(state["stackTag"][-1]) is TAG_Compound:
+    parentTagType = type(state["stackTag"][-1])
+    parentIsArray = (
+        parentTagType is TAG_Byte_Array or
+        parentTagType is TAG_Int_Array or
+        parentTagType is TAG_Long_Array
+    )
+
+    if parentTagType is TAG_Compound:
         state["stackTag"][-1].add(state["tag"])
-    elif type(state["stackTag"][-1]) is TAG_List:
+    elif parentTagType is TAG_List:
         state["stackTag"][-1].append(state["tag"])
+    elif parentIsArray:
+        array = state["stackTag"][-1].value
+        value = state["tag"].value
+        array = numpy.insert(array,len(array),value)
+        state["stackTag"][-1].value = array
     else:
         raise JSONFormatError("Invalid tag container type.")
 
     # If the new value is a container, go inside it.
-    if ( ( type(state["tag"]) is TAG_Compound ) or
-         ( type(state["tag"]) is TAG_List ) ):
+    if isContainer:
         state["stackTag"].append(state["tag"])
 
     # Reset the current state.
@@ -1095,6 +1105,8 @@ def json_to_tag(json):
     startQuote = None
     backslashFound = False
 
+    listTypeCharsLeft = 0
+
     state = {}
 
     state["name"]  = ''
@@ -1112,7 +1124,11 @@ def json_to_tag(json):
         # TODO Debug for testing the whitespace handler
         #print c,
         # i is the index of character c in json
-        if backslashFound:
+        if listTypeCharsLeft > 0:
+            debug += c
+            listTypeCharsLeft -= 1
+            continue
+        elif backslashFound:
             # Previous character was \, ignore this character
             debug += '?'
             backslashFound = False
@@ -1162,7 +1178,18 @@ def json_to_tag(json):
             # New list tag
             debug += '['
             state["native"] = []
-            state["tag"] = TAG_List()
+            typeId = json[i+1:i+3]
+            if typeId == u'B;':
+                state["tag"] = TAG_Byte_Array()
+                listTypeCharsLeft = 2
+            elif typeId == u'I;':
+                state["tag"] = TAG_Int_Array()
+                listTypeCharsLeft = 2
+            elif typeId == u'L;':
+                state["tag"] = TAG_Long_Array()
+                listTypeCharsLeft = 2
+            else:
+                state["tag"] = TAG_List()
             _jsonParser_storeValue(state)
             continue
         elif c == ']':
