@@ -22,9 +22,9 @@ from albow.translate import _, getLang
 from glbackground import Panel
 from pymclevel.nbt import load, TAG_Byte, TAG_Short, TAG_Int, TAG_Long, TAG_Float, \
     TAG_Double, TAG_String, TAG_Byte_Array, TAG_List, TAG_Compound, TAG_Int_Array, \
-    TAG_Short_Array, littleEndianNBT, NBTFormatError, TAG_BYTE, TAG_SHORT, TAG_INT, \
+    TAG_Long_Array, littleEndianNBT, NBTFormatError, TAG_BYTE, TAG_SHORT, TAG_INT, \
     TAG_LONG, TAG_FLOAT, TAG_DOUBLE, TAG_STRING, TAG_BYTE_ARRAY, TAG_LIST, TAG_COMPOUND, \
-    TAG_INT_ARRAY, TAG_SHORT_ARRAY
+    TAG_INT_ARRAY, TAG_LONG_ARRAY
 from numpy import array
 from albow.theme import root
 
@@ -132,7 +132,7 @@ default_bullet_styles = {TAG_Byte: ((20, 20, 200), None, 'circle', 'b'),
                          TAG_Byte_Array: ((20, 20, 200), None, 'square', 'B'),
                          TAG_Int_Array: ((16, 160, 160), None, 'square', 'I'),
                          TAG_List: ((200, 200, 200), (0, 0, 0), 'square', 'L'),
-                         TAG_Short_Array: ((200, 200, 20), None, 'square', 'S'),
+                         TAG_Long_Array: ((200, 200, 20), None, 'square', 'S'),
                          }
 default_bullet_styles[dict] = default_bullet_styles[TAG_List]
 
@@ -153,7 +153,7 @@ def change_styles():
             bullet_styles[key] = (get_bullet_image(i), None, 'image', '')
             i += 1
 
-        bullet_styles[TAG_Short_Array] = bullet_styles[TAG_Int_Array]
+        bullet_styles[TAG_Long_Array] = bullet_styles[TAG_Int_Array]
         bullet_styles[dict] = bullet_styles[TAG_List]
     else:
         bullet_styles = copy.deepcopy(default_bullet_styles)
@@ -174,7 +174,7 @@ field_types = {TAG_Byte: (IntField, (0, 256)),
 
 array_types = {TAG_Byte_Array: field_types[TAG_Byte],
                TAG_Int_Array: field_types[TAG_Int],
-               TAG_Short_Array: field_types[TAG_Short],
+               TAG_Long_Array: field_types[TAG_Long],
                }
 
 
@@ -204,7 +204,7 @@ item_types_map = {TAG_Byte: ("Byte", IntField, 0),
                   TAG_Compound: ("Compound", None, None),
                   TAG_Byte_Array: ("Byte Array", TextFieldWrapped, ""),
                   TAG_Int_Array: ("Int Array", TextFieldWrapped, ""),
-                  TAG_Short_Array: ("Short Array", TextFieldWrapped, ""),
+                  TAG_Long_Array: ("Long Array", TextFieldWrapped, ""),
                   }
 
 map_types_item = setup_map_types_item(item_types_map)
@@ -238,7 +238,7 @@ def create_array_item(self, i_type, i_name, i_value):
     return i_name, i_type(array(value, i_type.dtype), i_name)
 
 
-create_TAG_Byte_Array = create_TAG_Int_Array = create_TAG_Short_Array = create_array_item
+create_TAG_Byte_Array = create_TAG_Int_Array = create_TAG_Long_Array = create_array_item
 
 # -----------------------------------------------------------------------------
 class NBTTree(Tree):
