@@ -144,7 +144,12 @@ class TAG_Value(object):
             write_string(self.name, buf)
 
     def write_value(self, buf):
-        buf.write(self.fmt.pack(self.value))
+        try:
+            buf.write(self.fmt.pack(self.value))
+        except:
+            print "ERROR: could not save the following NBT tag:"
+            print self.json()
+            raise
 
     def isCompound(self):
         return False
@@ -410,7 +415,12 @@ class TAG_String(TAG_Value):
         return cls(value)
 
     def write_value(self, buf):
-        write_string(self._value, buf)
+        try:
+            write_string(self._value, buf)
+        except:
+            print "ERROR: could not save the following NBT tag:"
+            print self.json()
+            raise
 
     def decode(self, charset):
         self.value.decode(charset)
