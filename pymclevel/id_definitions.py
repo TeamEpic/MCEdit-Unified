@@ -7,7 +7,7 @@
 """
 The logic here is to load the JSON definitions for blocks, entities and tile entities for a given game version.
 
-Data for each game version is contained in subfolders of the 'mcver' one. These subfolders are named with a game version:
+Data for each game version is contained in subfolders of the mcverDir one. These subfolders are named with a game version:
 
 mcver/
   + 1.2/
@@ -45,6 +45,7 @@ import collections
 import sys
 from distutils.version import LooseVersion
 
+mcverDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../mcver/')
 
 log = getLogger(__name__)
 
@@ -141,18 +142,18 @@ def ids_loader(game_version, namespace=u"minecraft", json_dict=False, timestamps
         _json = {}
     if timestamps:
         _timestamps = {}
-    d = os.path.join('mcver', game_version)
+    d = os.path.join(mcverDir, game_version)
 
     # If version 1.2.4 files are not found, try to load the one for the closest
     # lower version (like 1.2.3 or 1.2).
     if not os.path.isdir(d) and game_version != "Unknown":
         log.info("No definitions found for MC %s. Trying to find ones for the closest lower version." % game_version)
-        ver_dirs = os.listdir('mcver')
+        ver_dirs = os.listdir(mcverDir)
         ver_dirs.append(game_version)
         ver_dirs.sort(key=LooseVersion)
         idx = ver_dirs.index(game_version) - 1
         ver = ver_dirs[idx]
-        d = os.path.join('mcver', ver)
+        d = os.path.join(mcverDir, ver)
         log.info("Closest lower version found is %s." % ver)
 
     if os.path.isdir(d):
@@ -192,7 +193,7 @@ def ids_loader(game_version, namespace=u"minecraft", json_dict=False, timestamps
                                 v = deps[-1]
                             log.info("Found dependency for %s %s"%(v, prefix))
                             deps.append(r)
-                            _data = _get_data(os.path.join('mcver', r, file_name))
+                            _data = _get_data(os.path.join(mcverDir, r, file_name))
                         else:
                             defs, ids = r
                             MCEDIT_DEFS.update(defs)
@@ -202,7 +203,7 @@ def ids_loader(game_version, namespace=u"minecraft", json_dict=False, timestamps
                         log.info("Loading definitions dependencies")
                         _data = {}
                         for dep in deps:
-                            _file_name = os.path.join('mcver', dep, file_name)
+                            _file_name = os.path.join(mcverDir, dep, file_name)
                             if os.path.exists(_file_name):
                                 log.info("Found %s"%_file_name)
                                 #_data.update(_get_data(_file_name))
