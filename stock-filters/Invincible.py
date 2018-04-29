@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 # Feel free to modify and use this filter however you wish. If you do,
 # please give credit to SethBling.
 # http://youtube.com/SethBling

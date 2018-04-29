@@ -1,4 +1,6 @@
-# -*- coding: utf_8 -*-
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 #.# Marks the layout modifications. -- D.C.-G.
 from config import config
 import albow

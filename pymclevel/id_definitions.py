@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 # id_definitions.py
 #
 # D.C.-G. (LaChal) 2016

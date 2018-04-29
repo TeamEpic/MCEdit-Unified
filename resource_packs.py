@@ -1,4 +1,6 @@
+#!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
+
 #!# If the comman line parameter '--debug-packs' is given, the logging level is set to debug.
 #!# Otherwise, it is set to critical.
 from PIL import Image

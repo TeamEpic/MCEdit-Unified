@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 '''MCEditForester.py
    Tree-generating script by dudecon
    http://www.minecraftforum.net/viewtopic.php?f=1022&t=219461

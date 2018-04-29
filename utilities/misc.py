@@ -1,3 +1,5 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
 
 # Taken from: http://stackoverflow.com/a/7346105
 class Singleton:

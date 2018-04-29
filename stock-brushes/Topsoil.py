@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 from editortools.brush import createBrushMask, createTileEntities
 from pymclevel.level import extractHeights
 import itertools

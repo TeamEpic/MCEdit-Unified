@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 biome_types = {
     -1: '(Uncalculated)',
     0: 'Ocean',

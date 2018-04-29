@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 from setuptools import setup
 from setuptools.extension import Extension
 from Cython.Distutils import build_ext

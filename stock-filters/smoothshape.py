@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 # Enlarge Filter by SethBling
 # Feel free to modify and reuse, but credit to SethBling would be nice.
 # http://youtube.com/sethbling

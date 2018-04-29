@@ -1,4 +1,6 @@
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 # extended_widgets.py
 # Moved albow related stuff from mceutils.
 from controls import ValueDisplay

@@ -1,4 +1,6 @@
-#! /usr/bin/env python
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 # Taken from http://www.pygame.org/project-Splash+screen-1186-.html by Rock Achu (rockhachu2)
 # and tweaked ;)
 import os

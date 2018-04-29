@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 from logging import getLogger
 from numpy import zeros, rollaxis, indices
 import traceback

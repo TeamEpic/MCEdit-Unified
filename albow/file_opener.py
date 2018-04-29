@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 #-# This is not an albow component.
 #-# It should be moved back to MCEdit root folder, since it does not defines GUI base widgets.
 import os

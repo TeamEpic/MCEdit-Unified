@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 # Versioned data relative objects
 MCEDIT_DEFS = {}
 MCEDIT_IDS = {} # Maps the numeric and name ids to entries in MCEDIT_DEFS

@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 # From http://code.activestate.com/recipes/498245/
 import collections
 import functools

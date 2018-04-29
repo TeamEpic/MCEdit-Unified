@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 """
 DeCliff filter contributed by Minecraft Forums user "DrRomz"
 

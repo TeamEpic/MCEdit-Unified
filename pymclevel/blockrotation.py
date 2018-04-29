@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 import materials
 from materials import alphaMaterials
 from numpy import arange, zeros

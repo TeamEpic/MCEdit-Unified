@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 # SethBling's SetBiome Filter
 # Directions: Just select a region and use this filter, it will apply the
 # biome to all columns within the selected region. It can be used on regions

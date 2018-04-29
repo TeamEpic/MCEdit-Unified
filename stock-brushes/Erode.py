@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 from pymclevel.materials import Block
 from editortools.brush import createBrushMask
 import numpy

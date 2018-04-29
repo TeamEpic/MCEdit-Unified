@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 #-# Modified by D.C.-G. for translation purpose
 from albow import Label
 from albow.translate import _

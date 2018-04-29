@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 import math
 """
 This function will produce a generator that will give out the blocks

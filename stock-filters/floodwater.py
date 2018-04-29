@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 from numpy import *
 from pymclevel import alphaMaterials, faceDirections, FaceYIncreasing
 from collections import deque

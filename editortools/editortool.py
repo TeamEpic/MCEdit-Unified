@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 from OpenGL import GL
 import numpy
 from depths import DepthOffset

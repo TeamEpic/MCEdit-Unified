@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 try:
     from pymclevel import _nbt
     print "Succesfully imported _nbt"

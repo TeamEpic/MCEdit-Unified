@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 from level import FakeChunk
 import logging
 from materials import pocketMaterials

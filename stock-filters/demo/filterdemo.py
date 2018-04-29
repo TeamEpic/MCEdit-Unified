@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 # the inputs list tells MCEdit what kind of options to present to the user.
 # each item is a (name, value) pair.  name is a text string acting
 # both as a text label for the input on-screen and a key for the 'options'

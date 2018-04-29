@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 from numpy import zeros, array
 import itertools
 from pymclevel.level import extractHeights

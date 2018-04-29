@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 def bresenham(p1, p2):
     """Bresenham line algorithm
     adapted for 3d.  slooooow."""

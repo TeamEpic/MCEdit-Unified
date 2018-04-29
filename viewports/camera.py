@@ -1,4 +1,6 @@
-# -*- coding: utf_8 -*-
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 # The above line is necessary, unless we want problems with encodings...
 from __future__ import unicode_literals
 import sys

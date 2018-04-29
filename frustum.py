@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 """View frustum modeling as series of clipping planes
 
 The Frustum object itself is only responsible for

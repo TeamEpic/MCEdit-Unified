@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 from pygame import Rect, draw
 from grid_view import GridView
 from utils import frame_rect

@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 """Utilities to support packages."""
 
 # NOTE: This module must remain compatible with Python 2.3, as it is shared

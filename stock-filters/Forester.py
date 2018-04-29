@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 # Version 5
 '''This takes a base MineCraft level and adds or edits trees.
 Place it in the folder where the save files are (usually .../.minecraft/saves)

@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 from albow import Label, TextFieldWrapped, Row, TableView, TableColumn, Column, Widget, Button, AttrRef, CheckBoxLabel
 from albow.dialogs import Dialog
 from editortools import thumbview

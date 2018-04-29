@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 FaceXIncreasing = 0
 FaceXDecreasing = 1
 FaceYIncreasing = 2

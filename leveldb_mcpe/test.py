@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 exceptions = 0
 from leveldb_mcpe import DB, Options, ReadOptions, WriteOptions, WriteBatch, RepairWrapper
 

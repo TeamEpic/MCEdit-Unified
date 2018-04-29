@@ -1,3 +1,6 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
+
 from albow.controls import RotatableImage, Label
 import pygame
 import os
